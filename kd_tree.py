@@ -11,7 +11,7 @@ class Node:
         self.right = right
 
 class HeapNode:
-    '''A node in a heap'''
+    '''A node in a min-heap'''
     def __init__(self, data, dist):
         self.data = data
         self.dist = dist
