@@ -10,15 +10,6 @@ class Node:
         self.left = left
         self.right = right
 
-class HeapNode:
-    '''A node in a heap'''
-    def __init__(self, data, dist):
-        self.data = data
-        self.dist = dist
-
-    def __lt__(self, other):
-        return self.dist < other.dist
-
 class KDTree:
     '''
     Usage:
@@ -81,6 +72,16 @@ class KDTree:
             dist_func = lambda x, y: sum((a - y[i]) ** 2 for i, a in enumerate(x))
         self.dist_func = dist_func
 
+    def get_knn(self, point, k) -> list:
+        '''Search for the k nearest neighbors of a given point.
+        Args:
+        point: The query point.
+        k: The number of nearest neighbors to be returned.
+        Returns:
+
+        '''
+        return [i[1] for i in self._get_knn(self.root, point, k, [])]
+
     def _get_knn(self, node, point, k, heap) -> list:
         '''Utile function to search for the k nearest neighbors of a given point.
         Args:
@@ -97,35 +98,25 @@ class KDTree:
         dist = self.dist_func(point, node.data)
         # if the heap is not full, push the current node into the heap
         if len(heap) < k:
-            heapq.heappush(heap, HeapNode(node.data, -dist))
+            heapq.heappush(heap, (-dist, node.data))
         else:
             # if the heap is full, only push the current node into the heap if
             # the distance is smaller than the largest distance in the heap
-            if dist < -heap[0].dist:
-                heapq.heappushpop(heap, HeapNode(node.data, -dist))
+            if dist < -heap[0][0]:
+                heapq.heappushpop(heap, (-dist, node.data))
         # if the query point is on the left side of the current node, search the left subtree first
         if point[node.dim] < node.data[node.dim]:
             self._get_knn(node.left, point, k, heap)
             # if the distance between the query point and the hyperplane
             # is smaller than the largest distance in the heap, search the right subtree
-            if abs(point[node.dim] - node.data[node.dim]) < -heap[0].dist:
+            if abs(point[node.dim] - node.data[node.dim]) < -heap[0][0]:
                 self._get_knn(node.right, point, k, heap)
         else:
             self._get_knn(node.right, point, k, heap)
-            if abs(point[node.dim] - node.data[node.dim]) < -heap[0].dist:
+            if abs(point[node.dim] - node.data[node.dim]) < -heap[0][0]:
                 self._get_knn(node.left, point, k, heap)
 
         return heap
-
-    def get_knn(self, point, k) -> list:
-        '''Search for the k nearest neighbors of a given point.
-        Args:
-        point: The query point.
-        k: The number of nearest neighbors to be returned.
-        Returns:
-        A list of the k nearest neighbors. (data, label)
-        '''
-        return [x.data for x in self._get_knn(self.root, point, k, [])]
         
     def get_nn(self, point):
         '''Search for the nearest neighbor of a given point.
@@ -134,7 +125,7 @@ class KDTree:
         Returns:
 
         '''
-        return [x.data for x in self._get_knn(self.root, point, 1, [])][0]
+        return self.get_knn(self.root, point, 1, [])[0][1]
 
 
 if __name__ == '__main__':
@@ -151,4 +142,3 @@ if __name__ == '__main__':
 
     query_point = [3, 4.5]
     print(kd_tree.get_knn(query_point, 2))
-    print(kd_tree.get_nn(query_point))
