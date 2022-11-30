@@ -14,7 +14,9 @@ Computational Geometry and Applications project on tree algorithms for the neare
 
 ### Segmentation
 Before segmentation
+
 ![Before segmentation](./figures/bridge_before_segmentation.png)
 
 After segmentation with nearest neighbor search in the color space
+
 ![After segmentation with nearest neighbor search](./figures/bridge_after_segmentation.png)
